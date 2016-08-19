@@ -5,24 +5,27 @@
 
 #define SPHERE_LED_COUNT 28 // Final count
 #define SPIRAL_LED_COUNT 163 // Final count
-#define RECEPTACLE_LED_COUNT 20
+#define INNER_RECEPTACLE_LED_COUNT 47 // Final count
+#define OUTER_RECEPTACLE_LED_COUNT 56 // Final count
 
 // LED Arrays
 CRGB sphere_leds[8][SPHERE_LED_COUNT];
 CRGB spiral_leds[SPIRAL_LED_COUNT];
-CRGB receptacle_leds[2][RECEPTACLE_LED_COUNT];
+CRGB inner_receptacle_leds[INNER_RECEPTACLE_LED_COUNT];
+CRGB outer_receptacle_leds[OUTER_RECEPTACLE_LED_COUNT];
 
 
 void setup() {
 
-  Serial.begin(57600);
+  // The serial monitor's speed setting must match this number or you'll see garbage.
+  Serial.begin(57600 /* baud */);
   Serial.println("resetting");
 
   // Don't use pin 20!!
 
   // Sphere
-  // Blue green yellow orange purple gray white black
-  // 22 -> 36
+  // Pin order: blue green yellow orange purple gray white black
+  // 22 -> 36 (non-consecutive in the settings below)
   LEDS.addLeds<WS2812,24,RGB>(sphere_leds[0],SPHERE_LED_COUNT);
   LEDS.addLeds<WS2812,26,RGB>(sphere_leds[1],SPHERE_LED_COUNT);
   LEDS.addLeds<WS2812,28,RGB>(sphere_leds[2],SPHERE_LED_COUNT);
@@ -35,25 +38,55 @@ void setup() {
   // Spiral
   LEDS.addLeds<WS2812,40,RGB>(spiral_leds,SPIRAL_LED_COUNT);
 
-  // Receptacle (not working)
-//  LEDS.addLeds<WS2812,46,RGB>(receptacle_leds[0],RECEPTACLE_LED_COUNT);
-//  LEDS.addLeds<WS2812,48,RGB>(receptacle_leds[1],RECEPTACLE_LED_COUNT);
+  // Receptacle
+  LEDS.addLeds<WS2812,46,RGB>(inner_receptacle_leds,INNER_RECEPTACLE_LED_COUNT);
+  LEDS.addLeds<WS2812,48,RGB>(outer_receptacle_leds,OUTER_RECEPTACLE_LED_COUNT);
 
-  FastLED.setBrightness(30);
+  FastLED.setBrightness(255);
 }
 
 void loop() {
 
   sphere_drops();
-//  failing_receptacle_check();
+  spiral_slowly_throbbing();
+  receptacle_slowly_throbbing();
 }
 
-void failing_receptacle_check() {
+void receptacle_slowly_throbbing() {
   static uint8_t hue = 0;
 
-  for (int i = 0; i < RECEPTACLE_LED_COUNT; i++) {
-    receptacle_leds[i] = CHSV(hue++, 255, 255);
+  for (int i = 0; i < OUTER_RECEPTACLE_LED_COUNT; i++) {
+    outer_receptacle_leds[i] = CHSV(hue + i, 255, 255);
+    if (i < INNER_RECEPTACLE_LED_COUNT) {
+      inner_receptacle_leds[i] = CHSV(hue + i, 255, 255);
+    }
   }
+
+  hue += 1;
+
+  FastLED.show();
+}
+
+void spiral_slowly_throbbing() {
+  static uint8_t hue = 0;
+
+  for (int i = 0; i < SPIRAL_LED_COUNT; i++) {
+    spiral_leds[i] = CHSV(hue + i, 255, 255);
+  }
+
+  hue += 1;
+
+  FastLED.show();
+}
+
+void spiral_drops() {
+  static uint8_t hue = 0;
+
+  for (int i = 0; i < SPIRAL_LED_COUNT; i++) {
+    spiral_leds[i] = CHSV(hue + i, 255, 255);
+  }
+
+  hue += 1;
 
   FastLED.show();
 }
