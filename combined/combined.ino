@@ -42,14 +42,68 @@ void setup() {
   LEDS.addLeds<WS2812,46,RGB>(inner_receptacle_leds,INNER_RECEPTACLE_LED_COUNT);
   LEDS.addLeds<WS2812,48,RGB>(outer_receptacle_leds,OUTER_RECEPTACLE_LED_COUNT);
 
-  FastLED.setBrightness(255);
+  FastLED.setBrightness(50);
 }
 
 void loop() {
 
   sphere_drops();
-  spiral_slowly_throbbing();
-  receptacle_slowly_throbbing();
+  spiral_spiraling_singles();
+  receptacle_drops();
+
+  FastLED.show();
+  delay(10);
+}
+
+void gumball_fill_up() {
+
+  // WIP; the fading isn't working for some reason
+  
+  static uint8_t spin = 0;
+
+  if (spin < SPIRAL_LED_COUNT) {
+    uint8_t i = spin;
+    spiral_leds[i] = CHSV(0, 100, 50);
+  } else if (spin < SPIRAL_LED_COUNT + SPHERE_LED_COUNT) {
+    uint8_t i = spin - SPIRAL_LED_COUNT;
+    for (int strip = 0; strip < 8; strip++) {
+      sphere_leds[strip][i] = CHSV(0, 10, 50);
+    }
+  } else {
+    delay(100);
+    fade_all_spiral_leds_by(252);
+    fade_all_sphere_leds_by(252);
+  }
+
+  delay(10);
+  spin += 1;
+  
+}
+
+void receptacle_drops() {
+  static uint8_t spin = 0;
+
+  for (int i = 0; i < OUTER_RECEPTACLE_LED_COUNT; i++) {
+
+    bool should_light_outer = (spin + i) % 12 == 0;
+    bool should_light_inner = (spin + i) % 12 == 6;
+
+    if (should_light_outer) {
+      outer_receptacle_leds[i] = CHSV(spin + i, 255, (should_light_outer) ? 100 : 0);
+    } else {
+      outer_receptacle_leds[i].fadeToBlackBy(64);
+    }
+    
+    if (i < INNER_RECEPTACLE_LED_COUNT) {
+      if (should_light_inner) {
+        inner_receptacle_leds[i] = CHSV(spin + i, 255, (should_light_inner) ? 100 : 0);
+      } else {
+        inner_receptacle_leds[i].fadeToBlackBy(64);
+      }
+    }
+  }
+
+  spin += 1;
 }
 
 void receptacle_slowly_throbbing() {
@@ -63,32 +117,51 @@ void receptacle_slowly_throbbing() {
   }
 
   hue += 1;
+}
 
-  FastLED.show();
+void spiral_spiraling_singles() {
+  static const uint8_t frequency = 10;
+  static const uint8_t cycle_length = 255 - (255 % frequency);
+  static const uint8_t color_multiple = 7; // Try to get this relatively prime vs frequency
+
+  static uint8_t spin = 0;
+  spin = (spin + 1) % cycle_length;
+
+  for (int i = 0; i < SPIRAL_LED_COUNT; i++) {
+    bool should_light = ((spin + i) % frequency) == 0;
+
+    if (should_light) {
+      spiral_leds[i] = CHSV(
+//        i * 1.5,
+        (color_multiple * (spin + i)) % cycle_length,
+        255,
+        (should_light) ? 100 : 0
+      );
+    } else {
+      spiral_leds[i].fadeToBlackBy(50);  
+    }
+  }
 }
 
 void spiral_slowly_throbbing() {
   static uint8_t hue = 0;
+  hue += 1; // Naturally cycles around 255
 
   for (int i = 0; i < SPIRAL_LED_COUNT; i++) {
-    spiral_leds[i] = CHSV(hue + i, 255, 255);
+    spiral_leds[i] = CHSV(hue + i, 255, 100);
   }
-
-  hue += 1;
-
-  FastLED.show();
 }
+
 
 void spiral_drops() {
   static uint8_t hue = 0;
 
   for (int i = 0; i < SPIRAL_LED_COUNT; i++) {
-    spiral_leds[i] = CHSV(hue + i, 255, 255);
+    bool should_light = (i % 10) == 0;
+    spiral_leds[i] = CHSV(hue + i, 255, (should_light) ? 100 : 0);
   }
 
   hue += 1;
-
-  FastLED.show();
 }
 
 
@@ -104,25 +177,32 @@ void sphere_drops() {
  
       bool should_light = ((MAX_VAL-1) - (3 * strip + i) % MAX_VAL == val);
 
-      sphere_leds[strip][i] = CHSV(
-        /* Hue */ hue++,
-        /* Sat */ 127,
-        /* Val */ (should_light) ? 100 : 0);
+      if (should_light) {
+        sphere_leds[strip][i] = CHSV(
+          /* Hue */ hue++,
+          /* Sat */ 255,
+          /* Val */ (should_light) ? 100 : 0
+        );
+      } else {
+        sphere_leds[strip][i].fadeToBlackBy(64);
+      }
             
     }
   }
 
-  FastLED.show(); 
-
   val = (val + 1) % MAX_VAL;
-
 }
 
+void fade_all_spiral_leds_by(uint8_t fade) { 
+  for(int i = 0; i < SPIRAL_LED_COUNT; i++) {
+    spiral_leds[i].nscale8(254);
+  }
+}
 
-void fade_all_sphere_leds_slightly() { 
+void fade_all_sphere_leds_by(uint8_t fade) { 
   for(int strip = 0; strip < 8; strip++) { 
     for(int i = 0; i < SPHERE_LED_COUNT; i++) {
-      sphere_leds[strip][i].nscale8(250); 
+      sphere_leds[strip][i].nscale8(254); 
     }
   }
 }
