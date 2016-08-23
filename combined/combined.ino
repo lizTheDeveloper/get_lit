@@ -3,6 +3,8 @@
 #define DATA_PIN 8
 #define CLOCK_PIN 13
 
+///// Counts
+
 #define SPHERE_STRIP_COUNT 8
 
 #define EXTENDED_STRIP_LED_COUNT 34
@@ -12,14 +14,19 @@
 #define INNER_RECEPTACLE_LED_COUNT 47
 #define OUTER_RECEPTACLE_LED_COUNT 56
 
+#define TOTAL_SPHERE_LED_COUNT (SPHERE_LED_COUNT * SPHERE_STRIP_COUNT)
+#define TOTAL_LED_COUNT (TOTAL_SPHERE_LED_COUNT + SPIRAL_LED_COUNT + INNER_RECEPTACLE_LED_COUNT + OUTER_RECEPTACLE_LED_COUNT)
+  
 #define SPIRAL_CIRCUMFERENCE_APPROX 25
 
-// LED Arrays
-CRGB sphere_leds[SPHERE_STRIP_COUNT][SPHERE_LED_COUNT];
+///// LEDs
+
 CRGB spiral_leds[SPIRAL_LED_COUNT];
+CRGB sphere_leds[SPHERE_STRIP_COUNT][SPHERE_LED_COUNT];
 CRGB inner_receptacle_leds[INNER_RECEPTACLE_LED_COUNT];
 CRGB outer_receptacle_leds[OUTER_RECEPTACLE_LED_COUNT];
 
+///////////
 
 void setup() {
 
@@ -49,19 +56,14 @@ void setup() {
   LEDS.addLeds<WS2812,48,RGB>(outer_receptacle_leds,OUTER_RECEPTACLE_LED_COUNT);
 
   FastLED.setBrightness(10);
-
-//  for (int i = 0; i < 255; i++) {
-//    Serial.print(i);
-//    Serial.print(" ");
-//    Serial.println(cos8(i));
-//  }
 }
 
 void loop() {
 
-  gumball_spiraling_randoms();
+//  gumball_spiraling_randoms();
 //  spiral_sparkles();
-  receptacle_drops();
+//  receptacle_sizzle();
+  all_sparkles();
 
 
   FastLED.show();
@@ -78,10 +80,6 @@ void test_vertical_alignment() {
 
     FastLED.show();
     delay(250);
-
-//    for (int i = 0; i < EXTENDED_STRIP_LED_COUNT; i++) {
-//      set_extended_strip_led(strip, i, CHSV(0, 100, 0));
-//    }
   }
 }
 
