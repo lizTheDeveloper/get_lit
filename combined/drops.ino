@@ -5,7 +5,10 @@
 void gumball_spiraling_randoms() {
   static bool initialized = false;
   static const uint8_t DROP_COUNT = 8;
-  static const uint8_t DROP_PERCENT_CHANCE = 2;
+  static const uint8_t DROP_PERCENT_CHANCE = 4; //originally 2
+  static const uint8_t SPHERE_FADE = 220; //lower means shorter drops 230 is original for both
+  static const uint8_t SPIRAL_FADE = 200;
+  static const uint8_t CYCLES_BETWEEN_DROPS = 10; //originally 10
 
   static uint8_t drops[DROP_COUNT];
   static uint8_t cycles_since_last_drop = 0;
@@ -19,12 +22,12 @@ void gumball_spiraling_randoms() {
 
   // Fade all
   for (int i = 0; i < SPIRAL_LED_COUNT; i++) {
-    spiral_leds[i].nscale8(230);
+    spiral_leds[i].nscale8(SPIRAL_FADE);
   }
 
   for (int i = 0; i < SPHERE_LED_COUNT; i++) {
     for (int strip = 0; strip < 8; strip++) {
-      sphere_leds[strip][i].nscale8(230);
+      sphere_leds[strip][i].nscale8(SPHERE_FADE);
     }
   }
 
@@ -44,7 +47,7 @@ void gumball_spiraling_randoms() {
       drops[d] += 1;
     } else {
       // This drop is done. Random chance of restarting.
-      if (cycles_since_last_drop > 10 && random(100) < DROP_PERCENT_CHANCE) {
+      if (cycles_since_last_drop > CYCLES_BETWEEN_DROPS && random(100) < DROP_PERCENT_CHANCE) {
         cycles_since_last_drop = 0;
 
         if (false) {
@@ -105,4 +108,3 @@ void sphere_drops() {
 
   val = (val + 1) % MAX_VAL;
 }
-
