@@ -55,16 +55,16 @@ void setup() {
   LEDS.addLeds<WS2812,46,RGB>(inner_receptacle_leds,INNER_RECEPTACLE_LED_COUNT);
   LEDS.addLeds<WS2812,48,RGB>(outer_receptacle_leds,OUTER_RECEPTACLE_LED_COUNT);
 
-  FastLED.setBrightness(10);
+  FastLED.setBrightness(40);
 }
 
 void loop() {
 
-//  gumball_spiraling_randoms();
+  gumball_spiraling_randoms();
 //  spiral_sparkles();
-//  receptacle_sizzle();
-  all_sparkles();
-
+  receptacle_fireworks();
+//  all_sparkles();
+//  receptacle_slowly_throbbing();
 
   FastLED.show();
   delay(10);
@@ -82,7 +82,6 @@ void test_vertical_alignment() {
     delay(250);
   }
 }
-
 
 
 void receptacle_sizzle() {
